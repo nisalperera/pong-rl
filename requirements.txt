@@ -1,2 +1,4 @@
-neat-python
-pygame
+tensorflow-rl 
+keras-rl 
+gymnasium[atari] 
+Pillow

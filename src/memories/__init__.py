@@ -1,0 +1,1 @@
+from .sequential_memory import get_memory
