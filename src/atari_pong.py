@@ -143,6 +143,7 @@ class Pong:
         Runs the model using pretrained embedding in evaluation mode.
         """
         state = self.environment.reset()
+        # state, _ = res
         for i in range(1000):
             self.environment.render()
             action = self.policy_network.forward(state).max(1)[1].view(-1, 1).to(self.device)

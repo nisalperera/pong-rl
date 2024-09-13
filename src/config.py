@@ -10,7 +10,7 @@ class Config:
     __config = {}
 
     @staticmethod
-    def get(name):
+    def get(name, default=None):
         """
         Returns the value of given name.
         
@@ -26,8 +26,8 @@ class Config:
         try:
             return deepcopy(Config.__config[name])
         except KeyError:
-            logger.warning("Config setting " + name + "not found.")
-            return
+            logger.warning("Config setting " + name + "not found. Returning default value")
+            return default
     
     @staticmethod
     def set(name, value):

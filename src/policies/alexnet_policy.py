@@ -39,6 +39,11 @@ class Alexnet(nn.Module):
         Returns:
             actions (tensor): A float tensor of numbers for each actions.
         """
+
+        
+        if next(self.parameters()).is_cuda and not images.is_cuda:
+            images = images.cuda()
+            
         alexnet_output = self.dropout(self.alexnet(images))
         actions = self.prelu(self.embed(alexnet_output))
 

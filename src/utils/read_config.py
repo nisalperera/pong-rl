@@ -58,3 +58,11 @@ def reading_config(file_path):
     #paths 
     #Config.set("output_dir", config.get("paths", "output_dir", fallback = "output"))
     Config.set("checkpoint_file", config.get("paths", "checkpoint_file", fallback = "checkpoint.pong.pth.tar"))
+
+    # Policy network
+    Config.set("policy_network", config.get("policy", "network", fallback = "resnet"))
+    Config.set("policy_depth", config.get("policy", "depth", fallback = 18))
+
+    # Policy network
+    Config.set("target_network", config.get("target_network", "network", fallback = "resnet"))
+    Config.set("target_depth", config.get("target_network", "depth", fallback = 18))

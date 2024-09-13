@@ -8,8 +8,7 @@ from utils.checkpoint import load_checkpoint, save_checkpoint
 from utils.read_config import reading_config
 from utils.setup_logging import setup_logging
 from environment import make_env
-from policies.resnet_policy import Resnet18
-from policies.alexnet_policy import Alexnet
+from policies import model_map
 from agent import Agent
 from replay_memory import ReplayMemory
 from config import Config
@@ -52,29 +51,35 @@ def main():
     device = Config.get("device")
     target_update = Config.get("target_update")
 
-    #policy network
-    #policy_network = Resnet18(n_actions, feature_extraction).to(device)
-    policy_network = Alexnet(n_actions, feature_extraction).to(device)
-    #target network
-    # target_network = Resnet18(n_actions, feature_extraction).to(device)
-    target_network = Alexnet(n_actions, feature_extraction).to(device)
-    #initializing the weights of target network
+    policy_network = Config.get("policy_network")
+    policy_depth = Config.get("policy_depth", 18 if policy_network == "resnet" else 0)
+    target_network = Config.get("policy_network")
+    target_depth = Config.get("policy_depth", 18 if target_network == "resnet" else 0)
+
+    # policy network
+    policy_network = model_map[policy_network][policy_depth](n_actions, feature_extraction).to(device)
+    
+    # target network
+    target_network = model_map[target_network][target_depth](n_actions, feature_extraction).to(device)
+    
+    # initializing the weights of target network
     target_network.load_state_dict(policy_network.state_dict())
-    #freezing the target network's weights
+    
+    # freezing the target network's weights
     target_network.eval()
 
-    #optimizer
+    # optimizer
     optimizer = adam_optimizer(policy_network, learning_rate)
 
-    #loss function
+    # loss function
     criterion = l1_loss
 
-    #experience
-    #Experience = namedtuple('Experience',('state', 'action', 'reward', 'next_state'))
+    # experience
+    # Experience = namedtuple('Experience',('state', 'action', 'reward', 'next_state'))
     memory_size = Config.get("memory_size")
     memory = ReplayMemory(memory_size)
 
-    #loading the checkpoint
+    # loading the checkpoint
     checkpoint_file = Path(output_dir / Config.get("checkpoint_file"))
     checkpoint_pong = load_checkpoint(checkpoint_file)
     start_episode = 1
@@ -84,15 +89,15 @@ def main():
         optimizer.load_state_dict(checkpoint_pong['optimizer'])
     del checkpoint_pong
 
-    #agent
+    # agent
     agent = Agent(policy_network, n_actions)
 
-    #model
+    # model
     model = Pong(env, policy_network, target_network, agent, optimizer, criterion, memory, output_dir)
 
-    #training
-    #model.train(episodes, target_update, start_episode, batch_size, epsilon_start, epsilon_end, epsilon_decay, gamma)
-    model.evalutate()
+    # training
+    model.train(episodes, target_update, start_episode, batch_size, epsilon_start, epsilon_end, epsilon_decay, gamma)
+    # model.evalutate()
 
 
 if __name__ == "__main__":

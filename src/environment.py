@@ -6,6 +6,10 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 
+# import ale_py
+
+# gym.register_envs(ale_py)
+
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env):
         """Take action on reset for environments that are fixed until firing."""
@@ -41,6 +45,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         done = None
         for i in range(self._skip):
             obs, reward, done, info = self.env.step(action)
+            # done = terminated or truncated
             if i == self._skip - 2: self._obs_buffer[0] = obs
             if i == self._skip - 1: self._obs_buffer[1] = obs
             total_reward += reward
@@ -68,8 +73,7 @@ class WarpFrame(gym.ObservationWrapper):
             self._num_colors = 3
 
     def observation(self, obs):
-        #pytorch order is (C, H, W)
-        obs = obs.transpose(2, 0, 1)
+        # obs = obs.transpose(2, 0, 1)
         transform = transforms.Compose([transforms.ToPILImage(),
                                         transforms.Resize((self._height,self._width)),
                                         transforms.Grayscale(num_output_channels=self._num_colors),
@@ -84,6 +88,7 @@ class WarpFrame(gym.ObservationWrapper):
 
 
 def make_env(env_name):
+    # env = gym.make("GymV26Environment-v0", env_id=env_name)
     env = gym.make(env_name)
     env = MaxAndSkipEnv(env)
     env = FireResetEnv(env)
