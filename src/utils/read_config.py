@@ -24,19 +24,22 @@ def reading_config(file_path):
         logger.exception("Config file doesn't exist.")
 
     #GPUs
-    Config.set("disable_cuda", config.getboolean("GPU", "disable_cuda", fallback=False))
+    device = config.getboolean("GPU", "disable_cuda", fallback=True)
+    Config.set("disable_cuda", device)
     if not Config.get("disable_cuda") and torch.cuda.is_available():
         Config.set("device", "cuda")
         logger.info('GPU is available')
     else:
         Config.set("device", "cpu")
         logger.info('Only CPU is available')
+
+    Config.set("output_dir", config.get("paths", "output_dir", fallback="output"))
     
     #environment
-    Config.set("env_name", config.get("environment", "env_name", fallback = 'PongNoFrameskip-v4'))
+    Config.set("env_name", config.get("environment", "env_name", fallback='PongNoFrameskip-v4'))
 
     #policy
-    Config.set("feature_extraction", config.getboolean("policy", "feature_extraction", fallback = False))
+    Config.set("feature_extraction", config.getboolean("policy", "feature_extraction", fallback=False))
 
     #target network
     Config.set("target_update", config.getint("target_network", "update_weights", fallback=10))
@@ -57,12 +60,12 @@ def reading_config(file_path):
 
     #paths 
     #Config.set("output_dir", config.get("paths", "output_dir", fallback = "output"))
-    Config.set("checkpoint_file", config.get("paths", "checkpoint_file", fallback = "checkpoint.pong.pth.tar"))
+    Config.set("checkpoint_file", config.get("paths", "checkpoint_file", fallback="checkpoint.pong.pth"))
 
     # Policy network
-    Config.set("policy_network", config.get("policy", "network", fallback = "resnet"))
-    Config.set("policy_depth", config.get("policy", "depth", fallback = 18))
+    Config.set("policy_network", config.get("policy", "network", fallback="resnet"))
+    Config.set("policy_depth", config.get("policy", "depth", fallback=18))
 
     # Policy network
-    Config.set("target_network", config.get("target_network", "network", fallback = "resnet"))
-    Config.set("target_depth", config.get("target_network", "depth", fallback = 18))
+    Config.set("target_network", config.get("target_network", "network", fallback="resnet"))
+    Config.set("target_depth", config.get("target_network", "depth", fallback=18))

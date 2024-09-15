@@ -7,7 +7,7 @@ from config import Config
 logger = logging.getLogger('pong')
 
 def save_checkpoint(episode, outdir, policy_net, optimizer, criterion, 
-                    filename = 'checkpoint.pong.pth.tar'):
+                    filename = 'checkpoint.pong.pth'):
     """
     Saves policy network's checkpoint
     Args:
@@ -36,11 +36,11 @@ def load_checkpoint(checkpoint_file):
     Raises:
         warning: If the checkpoint file doesn't exist.
     """
-    checkpoint = None
+
     try:
         checkpoint = torch.load(checkpoint_file, map_location=Config.get("device"))
         logger.info('Loading the checkpoint file')
+        return checkpoint
     except:
         logger.warning('Checkpoint file does not exist')
-    
-    return checkpoint
+        return None

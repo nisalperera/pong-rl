@@ -65,7 +65,7 @@ class Pong:
                 state = state.to(self.device)
                 action = self.agent.select_action(state, exploration_rate).to(self.device)
                 observation, reward, done, info = self.environment.step(action.item())
-                reward = torch.tensor([reward], device = self.device)
+                reward = torch.tensor([reward], device=self.device)
                 
                 #storing the difference of states in the memory.
                 old_state = state
