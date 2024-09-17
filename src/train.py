@@ -13,7 +13,6 @@ from environment import make_env
 from policies import model_map
 from agent import Agent
 from replay_memory import ReplayMemory
-# from config import Config
 from optimizer import adam_optimizer
 from loss_functions import l1_loss, mse_loss
 from atari_pong import Pong
@@ -81,7 +80,6 @@ def main():
     criterion = l1_loss
 
     # experience
-    # Experience = namedtuple('Experience',('state', 'action', 'reward', 'next_state'))
     memory_size = cfg.REPLAY_MEMORY.SIZE
     memory = ReplayMemory(memory_size)
 
