@@ -1,6 +1,5 @@
 import logging
 import random
-from config import Config
 
 logger = logging.getLogger('pong')
 

@@ -1,10 +1,11 @@
+import sys
 import logging
-from pathlib import Path
 
-LOG_LEVEL = logging.INFO
-logger = logging.getLogger("captioning")
 
-def setup_logging(logfile = None):
+LOG_LEVEL = logging.DEBUG
+logger = logging.getLogger("pong")
+
+def setup_logging(logfile=None):
     """
     Sets up logging to stout and to the given file
     Args:
@@ -16,18 +17,17 @@ def setup_logging(logfile = None):
     global logger
     logger.propagate = False
     formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s', "%H:%M:%S")
-    logger.setLevel(logging.INFO)
-    streamhandler = logging.StreamHandler()
-    streamhandler.setLevel(logging.INFO)
+    logger.setLevel(LOG_LEVEL)
+    streamhandler = logging.StreamHandler(sys.stdout)
+    streamhandler.setLevel(LOG_LEVEL)
     streamhandler.setFormatter(formatter)
     logger.addHandler(streamhandler)
 
     if logfile:
         try:
             filehandler = logging.FileHandler(logfile)
-        except FileNotFoundError as e:
-            logger.warning(e)
-        else:
-            filehandler.setLevel(logging.INFO)
+            filehandler.setLevel(LOG_LEVEL)
             filehandler.setFormatter(formatter)
             logger.addHandler(filehandler)
+        except FileNotFoundError as e:
+            logger.warning(e)

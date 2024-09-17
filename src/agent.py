@@ -1,7 +1,6 @@
 import random
 import torch
 import logging
-from config import Config
 
 logger = logging.getLogger("pong")
 
@@ -31,6 +30,5 @@ class Agent():
             return torch.tensor([[random.randrange(self.n_actions)]])
         else:
             with torch.no_grad():
-                actions = self.policy.forward(state).max(1)[1].view(-1, 1) 
-                logger.info("Agents action shape: {}".format(actions.shape))
+                actions = self.policy.forward(state).max(1)[1].view(-1, 1)
                 return actions

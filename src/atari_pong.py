@@ -1,14 +1,17 @@
-# some code has been taken from pytorch Reinforcement Learning (DQN) tutorial
-#https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
-
+import os
 import logging
 import torch
+
+from glob import glob
 from collections import namedtuple
 from itertools import count
 
-from config import Config
+from torch.utils.tensorboard import SummaryWriter
+
 from utils.checkpoint import save_checkpoint
 from epsilon_greedy_strategy import get_exploration_rate
+
+from usage import get_resourse_usage
 
 logger = logging.getLogger('pong')
 
@@ -27,7 +30,7 @@ class Pong:
 
     """
     def __init__(self, environment, policy_network, target_network, agent,
-                 optimizer, criterion, replay_memory, output_dir):
+                 optimizer, criterion, replay_memory, output_dir, device):
         self.environment = environment
         self.policy_network = policy_network
         self.target_network = target_network
@@ -37,7 +40,7 @@ class Pong:
         self.memory = replay_memory
         self.output_dir = output_dir
         self.Experience = namedtuple('Experience',('state', 'action', 'reward', 'next_state'))
-        self.device = Config.get("device")
+        self.device = device
     
     def train(self, episodes, target_update, start_episode, batch_size,
                 epsilon_start, epsilon_end, epsilon_decay, gamma):
@@ -54,17 +57,23 @@ class Pong:
             epsilon_decay (float):
             gamma (float):
         """ 
-        print(start_episode)
+
+        writer = SummaryWriter(log_dir=self.output_dir)
+
         for episode in range(start_episode, episodes + 1):
+            logger.info("Episode: {}".format(episode))
+            cpu_usage, memory_usage, gpu_usage = get_resourse_usage()
+            logger.info(f"CPU Usage: {cpu_usage}%")
+            logger.info(f"Memory Usage: {memory_usage}%")
+            logger.info(f"GPU Usage: {gpu_usage}%")
+
             state = self.environment.reset()
             exploration_rate = get_exploration_rate(epsilon_start, epsilon_end, epsilon_decay, episode)
-            print("Episode: ", episode)
-            logger.info("Episode: {}".format(episode))
             for timestep in count():
                 # obs = env.render(mode = 'rgb_array')
                 state = state.to(self.device)
                 action = self.agent.select_action(state, exploration_rate).to(self.device)
-                observation, reward, done, info = self.environment.step(action.item())
+                observation, reward, done, _ = self.environment.step(action.item())
                 reward = torch.tensor([reward], device=self.device)
                 
                 #storing the difference of states in the memory.
@@ -125,12 +134,15 @@ class Pong:
                             param.grad.data.clamp_(-1, 1)
                     self.optimizer.step()
 
+                    writer.add_scalar(f"Loss", round(loss.item(), 2), timestep)
+
                 if done:
                     logger.info("Episode {} completed.".format(episode))
                     break
             #updating the weights of target network
             #saving the checkpoint of policy network
             if episode % target_update == 0:
+                logger.info("Updating the weights of target network and saving the checkpoint of policy network")
                 self.target_network.load_state_dict(self.policy_network.state_dict())
                 save_checkpoint(episode = episode,
                                 outdir = self.output_dir,

@@ -2,7 +2,7 @@ import torch
 from pathlib import Path
 import logging
 
-from config import Config
+# from config import Config
 
 logger = logging.getLogger('pong')
 
@@ -24,7 +24,7 @@ def save_checkpoint(episode, outdir, policy_net, optimizer, criterion,
                 }, str(filename))
 
 
-def load_checkpoint(checkpoint_file):
+def load_checkpoint(checkpoint_file, device='cpu'):
     """
     Loads the checkpoint of the epoch, policy_net, optimizer.
     
@@ -38,7 +38,7 @@ def load_checkpoint(checkpoint_file):
     """
 
     try:
-        checkpoint = torch.load(checkpoint_file, map_location=Config.get("device"))
+        checkpoint = torch.load(checkpoint_file, map_location=device)
         logger.info('Loading the checkpoint file')
         return checkpoint
     except:

@@ -1,6 +1,8 @@
+import os
+
+from glob import glob
 from collections import namedtuple
 import logging
-from pathlib import Path
 from itertools import count
 import torch
 
@@ -11,7 +13,7 @@ from environment import make_env
 from policies import model_map
 from agent import Agent
 from replay_memory import ReplayMemory
-from config import Config
+# from config import Config
 from optimizer import adam_optimizer
 from loss_functions import l1_loss, mse_loss
 from atari_pong import Pong
@@ -20,41 +22,45 @@ logger = logging.getLogger('pong')
 
 def main():
 
+    #read config file
+    config_file = None
+    cfg = reading_config(config_file)
+
     #output directory
-    #output_dir = Path('/content/drive/My Drive/atari-pong-reinforcement-learning/output')
-    output_dir = Path("../output")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    dirs = glob(os.path.join(cfg.PATHS.OUTPUT_DIR, "run*"))
+    if len(dirs):
+        output_dir = os.path.join(cfg.PATHS.OUTPUT_DIR, f"run-{len(dirs)}")
+    else:
+        output_dir = os.path.join(cfg.PATHS.OUTPUT_DIR, f"run")
+        
+    os.makedirs(output_dir)
+
 
     #setup logging
-    logfile_path = Path(output_dir / "output.log")
+    logfile_path = os.path.join(output_dir, "output.log")
     setup_logging(logfile=logfile_path)
 
-    #read config file
-    #config_file = Path('/content/drive/My Drive/atari-pong-reinforcement-learning/config.ini')
-    config_file = Path("../config.ini")
-    reading_config(config_file)
-
     #environment
-    env_name = Config.get("env_name")
+    env_name = cfg.ENV.NAME
     env = make_env(env_name)
 
     #configs
-    batch_size = Config.get("training_batch_size")
-    episodes = Config.get("episodes")
-    gamma = Config.get("gamma")
-    learning_rate = Config.get("learning_rate")
-    epsilon_start = Config.get("epsilon_start")
-    epsilon_end = Config.get("epsilon_end")
-    epsilon_decay = Config.get("epsilon_decay")
-    feature_extraction = Config.get("feature_extraction")
+    batch_size = cfg.TRAINING.BATCH_SIZE
+    episodes = cfg.TRAINING.EPISODES
+    gamma = cfg.TRAINING.GAMMA
+    learning_rate = cfg.TRAINING.LR
+    epsilon_start = cfg.TRAINING.EPSILON.START
+    epsilon_end = cfg.TRAINING.EPSILON.END
+    epsilon_decay = cfg.TRAINING.EPSILON.DECAY
+    feature_extraction = cfg.POLICY.FEATURE_EXTRACTION
     n_actions = env.action_space.n
-    device = Config.get("device")
-    target_update = Config.get("target_update")
+    device = cfg.DEVICE
+    target_update = cfg.TARGET.UPDATE_WEIGHTS
 
-    policy_network = Config.get("policy_network")
-    policy_depth = Config.get("policy_depth", 18 if policy_network == "resnet" else 0)
-    target_network = Config.get("policy_network")
-    target_depth = Config.get("policy_depth", 18 if target_network == "resnet" else 0)
+    policy_network = cfg.POLICY.NETWORK.NAME
+    policy_depth = cfg.POLICY.NETWORK.DEPTH
+    target_network = cfg.TARGET.NETWORK.NAME
+    target_depth = cfg.TARGET.NETWORK.DEPTH
 
     # policy network
     policy_network = model_map[policy_network][policy_depth](n_actions, feature_extraction).to(device)
@@ -76,12 +82,12 @@ def main():
 
     # experience
     # Experience = namedtuple('Experience',('state', 'action', 'reward', 'next_state'))
-    memory_size = Config.get("memory_size")
+    memory_size = cfg.REPLAY_MEMORY.SIZE
     memory = ReplayMemory(memory_size)
 
     # loading the checkpoint
-    checkpoint_file = Path(output_dir / Config.get("checkpoint_file"))
-    checkpoint_pong = load_checkpoint(checkpoint_file)
+    checkpoint_file = os.path.join(output_dir, cfg.PATHS.CHECKPOINT)
+    checkpoint_pong = load_checkpoint(checkpoint_file, cfg.DEVICE)
     start_episode = 1
     if checkpoint_pong is not None:
         start_episode = checkpoint_pong['episode'] + 1
@@ -93,7 +99,7 @@ def main():
     agent = Agent(policy_network, n_actions)
 
     # model
-    model = Pong(env, policy_network, target_network, agent, optimizer, criterion, memory, output_dir)
+    model = Pong(env, policy_network, target_network, agent, optimizer, criterion, memory, output_dir, cfg.DEVICE)
 
     # training
     model.train(episodes, target_update, start_episode, batch_size, epsilon_start, epsilon_end, epsilon_decay, gamma)
