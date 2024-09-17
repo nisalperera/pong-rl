@@ -1,21 +1,19 @@
 import os
+import logging
 
 from glob import glob
-from collections import namedtuple
-import logging
-from itertools import count
-import torch
 
-from utils.checkpoint import load_checkpoint, save_checkpoint
+from agent import Agent
+from atari_pong import Pong
+from policies import model_map
+from environment import make_env
+from optimizer import adam_optimizer
+from replay_memory import ReplayMemory
+from loss_functions import l1_loss, mse_loss
+from utils.checkpoint import load_checkpoint
 from utils.read_config import reading_config
 from utils.setup_logging import setup_logging
-from environment import make_env
-from policies import model_map
-from agent import Agent
-from replay_memory import ReplayMemory
-from optimizer import adam_optimizer
-from loss_functions import l1_loss, mse_loss
-from atari_pong import Pong
+
 
 logger = logging.getLogger('pong')
 
