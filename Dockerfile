@@ -1,5 +1,7 @@
-FROM tensorflow/tensorflow:2.14.0-gpu
+FROM pytorch/pytorch:2.4.1-cuda12.1-cudnn9-devel
 
-RUN pip3 install swig
+COPY ./requirements-gpu.txt /opt/program/requirements-gpu.txt
 
-RUN pip3 install tensorflow-rl gymnasium[atari] "gymnasium[accept-rom-license]"
+WORKDIR /opt/program/
+
+RUN pip install -r requirements-gpu.txt
