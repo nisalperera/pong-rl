@@ -49,7 +49,6 @@ RUN apt update && apt install -y --no-install-recommends \
     libatlas-base-dev\
     libtbb2 \
     libtbb-dev \
-    libdc1394-22-dev \
     openssh-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
