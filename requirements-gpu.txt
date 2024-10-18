@@ -13,5 +13,5 @@ pyparsing==2.4.5
 python-dateutil==2.8.1
 scipy
 six
-torch==1.12.1+cu113 --find-links https://download.pytorch.org/whl/torch_stable.html
-torchvision==0.13.1+cu113 --find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.4.1+cu121 --find-links https://download.pytorch.org/whl/torch_stable.html
+torchvision==0.19.1+cu121 --find-links https://download.pytorch.org/whl/torch_stable.html
