@@ -10,7 +10,7 @@ _C = CN()
 # changes happen. It's recommended to keep a VERSION in your config file.
 _C.VERSION = 2
 
-_C.DEVICE = 'cpu'
+_C.DEVICE = 'cuda'
 
 _C.ENV = CN()
 _C.ENV.NAME = 'Pong-v4'

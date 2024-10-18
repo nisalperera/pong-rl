@@ -1,3 +1,4 @@
+import os
 import torch
 from pathlib import Path
 import logging
@@ -17,7 +18,7 @@ def save_checkpoint(episode, outdir, policy_net, optimizer, criterion,
         optimizer (object): optimizer for the model
         filename (Path): for checkpoint in outdir
     """
-    filename = outdir / filename
+    filename = os.path.join(outdir, filename)
     torch.save({'episode': episode,
                 'policy_net': policy_net.state_dict(),
                 'optimizer': optimizer.state_dict(),
